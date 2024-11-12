@@ -23,6 +23,21 @@ class DiffusionSimulator:
         self.anisotropy = anisotropy # @ref: https://www.nde-ed.org/Physics/Materials/Structure/anisotropy.xhtml
 
         # Define convolution kernel for Laplacian
-        self.kernel_iso = np.array([[0, 1, 0],
+        self.kernel = np.array([[0, 1, 0],
                                     [1, -4, 1],
                                     [0, 1, 0]], dtype=np.float32) # @ref: https://homepages.inf.ed.ac.uk/rbf/HIPR2/log.htm
+
+    def step(self):
+        """
+        Performs one diffusion step on the canvas.
+        """
+        for channel in ['red', 'green', 'blue']:
+            data = getattr(self.canvas, channel)
+            laplacian = convolve(data, self.kernel, mode='reflect')
+            diffusion = self.diffusion_rate * laplacian
+            # Apply anisotropy by scaling diffusion
+            diffusion *= self.anisotropy
+            # Update channel data
+            setattr(self.canvas, channel, data + diffusion)
+            # Ensure non-negative values
+            setattr(self.canvas, channel, np.clip(getattr(self.canvas, channel), 0, None))
