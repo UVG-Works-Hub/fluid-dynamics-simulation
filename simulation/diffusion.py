@@ -13,7 +13,7 @@ class DiffusionSimulator:
     def __init__(
         self,
         canvas,
-        diffusion_rates: dict = None,
+        diffusion_rate: float = 0.1,
         color_decay: float = 0.01,
         mixing_strength: float = 0.02,
     ):
@@ -28,12 +28,11 @@ class DiffusionSimulator:
             mixing_strength (float): Strength of color mixing between channels.
         """
         self.canvas = canvas
-
-        # Set default diffusion rates if not provided
-        if diffusion_rates is None:
-            self.diffusion_rates = {"red": 0.1, "green": 0.1, "blue": 0.1}
-        else:
-            self.diffusion_rates = diffusion_rates
+        self.diffusion_rates = {
+            "red": diffusion_rate,
+            "green": diffusion_rate,
+            "blue": diffusion_rate,
+        }
 
         self.color_decay = color_decay
         self.mixing_strength = mixing_strength
