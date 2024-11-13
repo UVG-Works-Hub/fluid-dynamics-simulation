@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class Canvas:
     """
     Represents the virtual canvas where color diffusion and propagation occur.
@@ -23,6 +24,14 @@ class Canvas:
         self.blue = np.zeros((height, width), dtype=np.float32)
         # Initialize barriers (1: barrier, 0: free space)
         self.barriers = np.zeros((height, width), dtype=np.float32)
+
+    def clear(self):
+        """
+        Clears the canvas by resetting all color channels.
+        """
+        self.red.fill(0)
+        self.green.fill(0)
+        self.blue.fill(0)
 
     def add_color_source(self, x: int, y: int, color: tuple, intensity: float = 1.0):
         """

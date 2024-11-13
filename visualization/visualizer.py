@@ -4,6 +4,7 @@ import pygame
 import numpy as np
 from __utils.helpers import interpolate_points
 
+
 class Visualizer:
     """
     Visualizes the simulation in real-time using Pygame.
@@ -57,6 +58,14 @@ class Visualizer:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            if event.type == pygame.KEYDOWN:
+                # Clear the canvas when 'c' key is pressed
+                if event.key == pygame.K_c:
+                    self.canvas.clear()
+                elif event.key == pygame.K_r:
+                    self.brush_color = (1.0, 0.0, 0.0)  # Red
+                elif event.key == pygame.K_b:
+                    self.brush_color = (0.0, 0.0, 1.0)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     self.drawing = True
@@ -76,7 +85,9 @@ class Visualizer:
                     canvas_y = int(y / self.scale)
                     if self.last_pos is not None:
                         # Interpolate points between last_pos and current_pos for smooth drawing
-                        interpolated_points = interpolate_points(self.last_pos, (canvas_x, canvas_y), self.brush_size)
+                        interpolated_points = interpolate_points(
+                            self.last_pos, (canvas_x, canvas_y), self.brush_size
+                        )
                         for point in interpolated_points:
                             self.add_brush_stroke(point[0], point[1])
                     else:
@@ -103,9 +114,15 @@ class Visualizer:
                     if 0 <= px < self.canvas.width and 0 <= py < self.canvas.height:
                         # Add color source with specified intensity
                         current_color = self.brush_color
-                        self.canvas.red[py, px] += current_color[0] * self.brush_intensity
-                        self.canvas.green[py, px] += current_color[1] * self.brush_intensity
-                        self.canvas.blue[py, px] += current_color[2] * self.brush_intensity
+                        self.canvas.red[py, px] += (
+                            current_color[0] * self.brush_intensity
+                        )
+                        self.canvas.green[py, px] += (
+                            current_color[1] * self.brush_intensity
+                        )
+                        self.canvas.blue[py, px] += (
+                            current_color[2] * self.brush_intensity
+                        )
         # Ensure color channels are within [0, 1]
         self.canvas.red = np.clip(self.canvas.red, 0, 1)
         self.canvas.green = np.clip(self.canvas.green, 0, 1)

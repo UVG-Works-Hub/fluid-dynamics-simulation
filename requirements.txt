@@ -3,3 +3,4 @@ scipy
 pygame
 matplotlib
 deap
+pygame_gui
