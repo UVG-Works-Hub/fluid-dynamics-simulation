@@ -1,5 +1,3 @@
-# simulation/fluid_flow.py
-
 import numpy as np
 from scipy.ndimage import convolve
 
@@ -14,7 +12,7 @@ class FluidFlowSimulator:
         canvas,
         viscosity: float = 0.1,
         diffusion: float = 0.0001,
-        gravity: float = 0.0,
+        gravity: float = 0.05,  # Increased default gravity for noticeable dripping
     ):
         """
         Initializes the fluid flow simulator.
@@ -85,13 +83,27 @@ class FluidFlowSimulator:
         self.u += self.diffusion * u_lap - self.viscosity * self.u
         self.v += self.diffusion * v_lap - self.viscosity * self.v
 
-        # Apply gravity
-        self.v += self.gravity
+        # Compute intensity based on color channels (brightness)
+        intensity = np.maximum(
+            self.canvas.red, np.maximum(self.canvas.green, self.canvas.blue)
+        )
+
+        # Normalize intensity to range [0, 1]
+        intensity_normalized = (
+            intensity / intensity.max() if intensity.max() > 0 else intensity
+        )
+
+        # Apply gravity scaled by intensity to enhance dripping in intense regions
+        self.v += self.gravity * intensity_normalized * dt
 
         # Apply barriers by setting velocity to zero at barrier locations
         barriers = self.canvas.barriers
         self.u *= 1 - barriers
         self.v *= 1 - barriers
+
+        # Optionally, apply a threshold to prevent minimal drips
+        drip_threshold = 0.01
+        self.v[intensity_normalized < drip_threshold] *= 0.5  # Dampen weak regions
 
         # Advect the color channels based on velocity
         red_prev = self.canvas.red.copy()
