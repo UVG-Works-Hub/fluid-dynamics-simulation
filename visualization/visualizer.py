@@ -4,7 +4,13 @@ import pygame
 import numpy as np
 from __utils.helpers import interpolate_points
 import pygame_gui
+from enum import Enum, auto
 
+class Mode(Enum):
+    BRUSH = auto()
+    ERASER = auto()
+    ADD_BARRIER = auto()
+    REMOVE_BARRIER = auto()
 
 class Visualizer:
     """
@@ -29,7 +35,8 @@ class Visualizer:
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode(
-            (width, height), pygame.DOUBLEBUF | pygame.HWACCEL | pygame.HWSURFACE)
+            (width, height), pygame.DOUBLEBUF | pygame.HWACCEL | pygame.HWSURFACE
+        )
         pygame.display.set_caption("Color Diffusion Simulation")
         self.clock = pygame.time.Clock()
         self.running = True
@@ -39,6 +46,8 @@ class Visualizer:
         self.brush_color = (1.0, 0.0, 0.0)  # Red
         self.brush_intensity = 1.0
         self.brush_size = 5  # Radius in canvas units
+
+        self.mode = Mode.BRUSH  # Initial mode
 
         self.ui_manager = pygame_gui.UIManager((self.width, self.height))
         self.create_ui_elements()
@@ -55,19 +64,6 @@ class Visualizer:
             relative_rect=pygame.Rect((10, 10), (200, 30)),
             start_value=self.brush_size,
             value_range=(1, 50),
-            manager=self.ui_manager,
-        )
-
-        # Label for color picker button
-        self.color_picker_label = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((220, -10), (100, 30)),
-            text="Color Picker",
-            manager=self.ui_manager,
-        )
-        # Button to open color picker
-        self.color_picker_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((220, 10), (100, 30)),
-            text="Pick Color",
             manager=self.ui_manager,
         )
 
@@ -111,6 +107,27 @@ class Visualizer:
             manager=self.ui_manager,
         )
 
+        # Label for color picker button
+        self.color_picker_label = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((220, -10), (100, 30)),
+            text="Color Picker",
+            manager=self.ui_manager,
+        )
+
+        # Button to open color picker
+        self.color_picker_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((220, 10), (100, 30)),
+            text="Pick Color",
+            manager=self.ui_manager,
+        )
+
+        # Label for current mode
+        self.mode_label = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((220, 40), (100, 30)),
+            text=f"Mode: {self.mode.name}",
+            manager=self.ui_manager,
+        )
+
     def update_labels(self):
         self.brush_size_label.set_text(
             f"Brush Size: {self.brush_size_slider.get_current_value()}"
@@ -124,6 +141,7 @@ class Visualizer:
         self.viscosity_label.set_text(
             f"Viscosity: {self.viscosity_slider.get_current_value()}"
         )
+        self.mode_label.set_text(f"Mode: {self.mode.name}")
 
     def open_color_picker(self):
         pygame_gui.windows.UIColourPickerDialog(
@@ -158,7 +176,6 @@ class Visualizer:
             y (int): Y-coordinate on the canvas.
         """
         # Draw a circle of brush_size radius
-
         for dx in range(-self.brush_size, self.brush_size + 1):
             for dy in range(-self.brush_size, self.brush_size + 1):
                 if dx**2 + dy**2 <= self.brush_size**2:
@@ -180,6 +197,57 @@ class Visualizer:
         self.canvas.red = np.clip(self.canvas.red, 0, 1)
         self.canvas.green = np.clip(self.canvas.green, 0, 1)
         self.canvas.blue = np.clip(self.canvas.blue, 0, 1)
+
+    def erase_brush_stroke(self, x: int, y: int):
+        """
+        Erases color at the specified canvas coordinates.
+
+        Parameters:
+            x (int): X-coordinate on the canvas.
+            y (int): Y-coordinate on the canvas.
+        """
+        for dx in range(-self.brush_size, self.brush_size + 1):
+            for dy in range(-self.brush_size, self.brush_size + 1):
+                if dx**2 + dy**2 <= self.brush_size**2:
+                    px = x + dx
+                    py = y + dy
+                    if 0 <= px < self.canvas.width and 0 <= py < self.canvas.height:
+                        # Erase colors
+                        self.canvas.red[py, px] = 0.0
+                        self.canvas.green[py, px] = 0.0
+                        self.canvas.blue[py, px] = 0.0
+
+    def add_barrier_stroke(self, x: int, y: int):
+        """
+        Adds barriers in a stroke-like manner at the specified canvas coordinates.
+
+        Parameters:
+            x (int): X-coordinate on the canvas.
+            y (int): Y-coordinate on the canvas.
+        """
+        for dx in range(-self.brush_size, self.brush_size + 1):
+            for dy in range(-self.brush_size, self.brush_size + 1):
+                if dx**2 + dy**2 <= self.brush_size**2:
+                    px = x + dx
+                    py = y + dy
+                    if 0 <= px < self.canvas.width and 0 <= py < self.canvas.height:
+                        self.canvas.add_barrier(px, py)
+
+    def remove_barrier_stroke(self, x: int, y: int):
+        """
+        Removes barriers in a stroke-like manner at the specified canvas coordinates.
+
+        Parameters:
+            x (int): X-coordinate on the canvas.
+            y (int): Y-coordinate on the canvas.
+        """
+        for dx in range(-self.brush_size, self.brush_size + 1):
+            for dy in range(-self.brush_size, self.brush_size + 1):
+                if dx**2 + dy**2 <= self.brush_size**2:
+                    px = x + dx
+                    py = y + dy
+                    if 0 <= px < self.canvas.width and 0 <= py < self.canvas.height:
+                        self.canvas.remove_barrier(px, py)
 
     def handle_events(self):
         """
@@ -226,13 +294,36 @@ class Visualizer:
                     self.brush_color = (0.0, 0.0, 1.0)
                 elif event.key == pygame.K_g:
                     self.brush_color = (0.0, 1.0, 0.0)
+                elif event.key == pygame.K_2:
+                    self.mode = Mode.ERASER
+                    self.update_labels()
+                    print("Mode switched to Eraser.")
+                elif event.key == pygame.K_3:
+                    self.mode = Mode.ADD_BARRIER
+                    self.update_labels()
+                    print("Mode switched to Add Barrier.")
+                elif event.key == pygame.K_4:
+                    self.mode = Mode.REMOVE_BARRIER
+                    self.update_labels()
+                    print("Mode switched to Remove Barrier.")
+                elif event.key == pygame.K_1:
+                    self.mode = Mode.BRUSH
+                    self.update_labels()
+                    print("Mode switched to Brush.")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     self.drawing = True
                     x, y = pygame.mouse.get_pos()
                     canvas_x = int(x / self.scale)
                     canvas_y = int(y / self.scale)
-                    self.add_brush_stroke(canvas_x, canvas_y)
+                    if self.mode == Mode.BRUSH:
+                        self.add_brush_stroke(canvas_x, canvas_y)
+                    elif self.mode == Mode.ERASER:
+                        self.erase_brush_stroke(canvas_x, canvas_y)
+                    elif self.mode == Mode.ADD_BARRIER:
+                        self.add_barrier_stroke(canvas_x, canvas_y)
+                    elif self.mode == Mode.REMOVE_BARRIER:
+                        self.remove_barrier_stroke(canvas_x, canvas_y)
                     self.last_pos = (canvas_x, canvas_y)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:  # Left mouse button
@@ -249,9 +340,14 @@ class Visualizer:
                             self.last_pos, (canvas_x, canvas_y), self.brush_size
                         )
                         for point in interpolated_points:
-                            self.add_brush_stroke(point[0], point[1])
-                    else:
-                        self.add_brush_stroke(canvas_x, canvas_y)
+                            if self.mode == Mode.BRUSH:
+                                self.add_brush_stroke(point[0], point[1])
+                            elif self.mode == Mode.ERASER:
+                                self.erase_brush_stroke(point[0], point[1])
+                            elif self.mode == Mode.ADD_BARRIER:
+                                self.add_barrier_stroke(point[0], point[1])
+                            elif self.mode == Mode.REMOVE_BARRIER:
+                                self.remove_barrier_stroke(point[0], point[1])
                     self.last_pos = (canvas_x, canvas_y)
 
             # Exit when Escape key is pressed

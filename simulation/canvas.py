@@ -27,11 +27,12 @@ class Canvas:
 
     def clear(self):
         """
-        Clears the canvas by resetting all color channels.
+        Clears the canvas by resetting all color channels and barriers.
         """
         self.red.fill(0)
         self.green.fill(0)
         self.blue.fill(0)
+        self.barriers.fill(0)
 
     def add_color_source(self, x: int, y: int, color: tuple, intensity: float = 1.0):
         """
@@ -58,6 +59,17 @@ class Canvas:
         """
         if 0 <= x < self.width and 0 <= y < self.height:
             self.barriers[y, x] = 1.0
+
+    def remove_barrier(self, x: int, y: int):
+        """
+        Removes a barrier at the specified position.
+
+        Parameters:
+            x (int): X-coordinate.
+            y (int): Y-coordinate.
+        """
+        if 0 <= x < self.width and 0 <= y < self.height:
+            self.barriers[y, x] = 0.0
 
     def get_color_image(self) -> np.ndarray:
         """
