@@ -24,7 +24,7 @@ The simulation visualizes the real-time behavior of fluid flow and color diffusi
 
 1. **Clone the Repository**
    ```bash
-   git clone git@github.com:UVG-Works-Hub/artistic-diffusion-sim.git
+   git clone https://github.com/UVG-Works-Hub/fluid-dynamics-simulation
    cd artistic-diffusion-sim
    ```
 
@@ -71,11 +71,17 @@ The simulation visualizes the real-time behavior of fluid flow and color diffusi
 
 - **Other Controls**
   - **Clear Canvas**: Press `c` to clear all colors from the canvas.
-  - **Reset Brush Color**: Press `r`, `g`, or `b` to reset the brush color to red, green, or blue respectively.
+  - **Reset Brush Color**: Press `r`, `g`, `b` or `t` to reset the brush color to red, green, blue or lighT blue respectively.
+  - **Toggle Stochastic Noise: Press `n` to toggle stochastic noise over the canvas.
   - **Exit Simulation**: Press `Escape` or close the window to exit.
 
 ## Gallery
 
+![noise5](https://github.com/user-attachments/assets/d06aeaa4-04c7-4c90-be8d-0bd2a4d26de7)
+
+![asd](https://github.com/user-attachments/assets/49bad4fe-5b1d-4633-84fe-82fcd144a22a)
+
+![fluido_gravedad_mezcla](https://github.com/user-attachments/assets/881d10d8-9e63-45a8-bf0b-3fcdb052da3b)
 
 
 ## Documentation
