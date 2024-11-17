@@ -48,7 +48,7 @@ class Visualizer:
         self.brush_size = 5  # Radius in canvas units
 
         self.mode = Mode.BRUSH  # Initial mode
-
+        self.toggle_noise = False
         self.ui_manager = pygame_gui.UIManager((self.width, self.height))
         self.create_ui_elements()
 
@@ -292,6 +292,8 @@ class Visualizer:
                     self.brush_color = (1.0, 0.0, 0.0)  # Red
                 elif event.key == pygame.K_b:
                     self.brush_color = (0.0, 0.0, 1.0)
+                elif event.key == pygame.K_t:
+                    self.brush_color = (16/255, 229/255, 176/255)
                 elif event.key == pygame.K_g:
                     self.brush_color = (0.0, 1.0, 0.0)
                 elif event.key == pygame.K_2:
@@ -310,6 +312,9 @@ class Visualizer:
                     self.mode = Mode.BRUSH
                     self.update_labels()
                     print("Mode switched to Brush.")
+                elif event.key == pygame.K_n:
+                    self.toggle_noise = not self.toggle_noise
+                    print("Stochastic noise:", self.toggle_noise)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     self.drawing = True

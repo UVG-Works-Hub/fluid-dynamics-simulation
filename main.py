@@ -57,8 +57,9 @@ def main():
         diffusion_sim.step()
         fluid_flow_sim.step()
 
+        if visualizer.toggle_noise:
         # Add stochastic noise
-        # add_random_noise(canvas, intensity=0.01)
+            add_random_noise(canvas, intensity=0.01)
 
     # Run the visualization loop
     visualizer.run(simulation_step)
