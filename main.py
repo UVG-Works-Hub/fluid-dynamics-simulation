@@ -53,16 +53,16 @@ def main():
         fluid_flow_sim.gravity = visualizer.gravity_slider.get_current_value()
         fluid_flow_sim.viscosity = visualizer.viscosity_slider.get_current_value()
 
-        print("Diffusion Rate: ", diffusion_sim.diffusion_rate)
-        print("Gravity: ", fluid_flow_sim.gravity)
-        print("Viscosity: ", fluid_flow_sim.viscosity)
+        # print("Diffusion Rate: ", diffusion_sim.diffusion_rate)
+        # print("Gravity: ", fluid_flow_sim.gravity)
+        # print("Viscosity: ", fluid_flow_sim.viscosity)
 
         # Perform simulation steps
         diffusion_sim.step()
         fluid_flow_sim.step()
 
         # Add stochastic noise
-        add_random_noise(canvas, intensity=0.01)
+        # add_random_noise(canvas, intensity=0.01)
 
     # Run the visualization loop
     visualizer.run(simulation_step)

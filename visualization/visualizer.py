@@ -28,7 +28,8 @@ class Visualizer:
         self.canvas_height = height // scale
         self.width = width
         self.height = height
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode(
+            (width, height), pygame.DOUBLEBUF | pygame.HWACCEL | pygame.HWSURFACE)
         pygame.display.set_caption("Color Diffusion Simulation")
         self.clock = pygame.time.Clock()
         self.running = True
@@ -223,6 +224,8 @@ class Visualizer:
                     self.brush_color = (1.0, 0.0, 0.0)  # Red
                 elif event.key == pygame.K_b:
                     self.brush_color = (0.0, 0.0, 1.0)
+                elif event.key == pygame.K_g:
+                    self.brush_color = (0.0, 1.0, 0.0)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     self.drawing = True
